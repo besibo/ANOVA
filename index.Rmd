@@ -1,0 +1,966 @@
+---
+title       : L'analyse de variance
+subtitle    : Une introduction...
+author      : Benoit Simon-Bouhet
+job         : Journal club, 21 février 2014
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : solarized_light      # 
+widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+--- 
+
+## L'ANOVA : pour quoi faire ?
+
+```{r echo=FALSE, warning=FALSE, error=FALSE}
+opts_knit$set(out.format = 'html')
+opts_chunk$set(comment="")
+```
+
+<br/>
+
+> * Pour chaque test statistique, plusieurs choses sont fixées :
+    1. les hypothèses nulles et alternatives
+    2. le seuil $\alpha$, souvent fixé à 5% par convention
+> * $\alpha$ est l'erreur de type I : la probabilité de rejeter *à tort* $H_0$
+
+<br/>
+
+> * PROBLÈME : les erreurs <span style="color: #ff0000; font-size: 30pt">s'ajoutent</span> toujours !
+
+---
+
+## L'ANOVA : pour quoi faire ?
+
+<br/>
+
+Au bout de combien de tests est-on certain de s'être trompé quelque part ?
+
+> * Comparer la moyenne de <span style="color: #ff0000">2</span> échantillons requiert <span style="color: #ff0000">1</span> test
+> * Comparer la moyenne de <span style="color: #ff0000">3</span> échantillons requiert <span style="color: #ff0000">3</span> tests
+> * Comparer la moyenne de <span style="color: #ff0000">4</span> échantillons requiert <span style="color: #ff0000">6</span> tests
+> * Comparer la moyenne de <span style="color: #ff0000">5</span> échantillons requiert <span style="color: #ff0000">10</span> tests
+> * Comparer la moyenne de <span style="color: #ff0000">6</span> échantillons requiert <span style="color: #ff0000">15</span> tests
+> * Comparer la moyenne de <span style="color: #ff0000">7</span> échantillons requiert <span style="color: #ff0000">21</span> tests
+
+---
+
+## L'ANOVA : pour quoi faire ?
+
+<br/>
+
+L'ANOVA permet de comparer la moyenne de $k$ échantillons en <span style="color: #ff0000">un seul test</span> (ou presque !).
+
+<br/>
+
+Pour l'ANOVA la plus simple (ANOVA 1 facteur), les hypothèses sont les suivantes :
+> * $H_0$ : le facteur étudié n'a pas d'effet sur la moyenne des échantillons
+> * $H_1$ : le facteur étudié a un effet sur la moyenne des échantillons
+
+<br/>
+> * $H_0$ : la moyenne de tous les échantillons est identique
+> * $H_1$ : <span style="color: #ff0000">au moins</span> un échantillon a une moyenne différente des autres
+
+---
+
+## ANOVA et régression
+
+Construire un <span style="color: #ff0000">modèle d'ANOVA</span> c'est exactement comme construire un modèle de régression. Il faut :
+> * respecter des conditions d'application (détails plus loin)
+> * disposer d'une variable expliquée quantitative (et continue)
+> * disposer d'une ou plusieurs variables explicatives pouvant potentiellement influencer la variable expliquée (c'est ce qu'on cherche à déterminer)
+> * avoir une idée de la façon dont les variables explicatives peuvent se combiner pour influencer la variable expliquée (effets additifs, multiplicatifs, autres ?)
+
+<br/>
+> * Une différence de taille toutefois : pour la régression, les variables explicatives sont toutes quantitatives (et continues), pour l'ANOVA, les variables explicatives sont toutes qualititives (factorielles, nominales).
+
+--- .fill
+
+<iframe src = './maths.jpg'></iframe>
+
+---
+
+## Les grands principes
+
+Quand on souhaite comparer la moyenne de plusieurs groupes, il est important de distinguer plusieurs sources de variation : 
+
+### La variation intra groupe
+
+Puisque les individus d'un groupe donné subissent tous les même traitements, la variation observée ici est indépendante des facteurs étudiés et n'est donc due qu'à la variation naturelle. C'est la variation liée au hasard que les anglo-saxons nomment <span style="color: #ff0000">error variance</span>.
+
+### La variation inter groupes
+
+Elle représente la variation systématique due au(x) facteur(s) qui nous intéresse(nt). C'est la manifestation de l'effet qui nous intéresse : <span style="color: #ff0000">effect variance</span>.
+
+Si l'<span style="color: #ff0000">effect variance</span> est grande devant l'<span style="color: #ff0000">error variance</span>, on aura tendance à conclure (à bon escient) que les groupes étudiés diffèrent. 
+
+--- &twocol
+
+## Les grands principes
+
+Toutes choses étant égales par ailleurs, plus la variation intra groupe sera grande, moins il sera facile de distinguer les groupes
+
+*** =left
+```{r echo=FALSE}
+ad.curve <- function(moy,et,fac,add=T,add2=T,...) {
+
+vmin = min(moy-3*et)
+vmax = max(moy+3*et)
+x0 <- seq(vmin,vmax,len=500)
+
+n.graph <- length(moy)
+colo <- heat.colors(n.graph)
+
+tab <- matrix(0,ncol=(n.graph+1),nrow=length(x0))
+noms <- character(n.graph)
+noms2 <- character(1)
+
+for (i in 1:n.graph){
+  tab[,i] <- fac[i]*dnorm(x0,moy[i],et[i])
+	noms[i] <- paste(fac[i],"* N(",moy[i],",",et[i],")")
+	}
+
+tab[,(n.graph+1)]	<- apply(tab,1,sum)
+
+noms2 <- noms[1]
+for (i in 2:n.graph){
+	noms2 <- paste(noms2,noms[i],sep=", ")
+	}
+	
+plot(rep(0,vmax),type="n",main="",xlab="Taille",ylab="Abondance",las=1,xlim=range(x0),ylim=range(tab[,ncol(tab)]),...)
+
+
+if (add2==T) {
+	for (i in 1:n.graph) {
+	lines(x0,tab[,i],col=colo[i],lwd=3)
+	}
+	legend("topright",noms,col=colo,lwd=3,lty=1,bg=grey(.7))
+	}
+	
+if (add==TRUE)
+lines(x0,tab[,(n.graph+1)],col="blue",lty=2,lwd=3)
+
+}
+ad.curve(c(10,15),c(1,1),c(1,1))
+```
+
+*** =right
+
+```{r echo=FALSE}
+ad.curve(c(10,15),c(5,5),c(1,1))
+```
+
+--- &twocol
+
+## Les grands principes
+
+Toutes choses étant égales par ailleurs, plus la variation inter groupes sera faible, moins il sera facile de distinguer les groupes
+
+*** =left
+```{r echo=FALSE}
+ad.curve(c(10,15,20),c(1,1,1),c(1,1,1))
+```
+
+*** =right
+
+```{r echo=FALSE}
+ad.curve(c(14,15,16),c(1,1,1),c(1,1,1))
+```
+
+--- &twocol
+
+## Les grands principes
+
+Enfin, le troisième élément important est $n$, le nombre d'observations dans chaque groupe. Toutes choses étant égales par ailleurs, plus $n$ sera grand, plus nous aurons de raisons de penser qu'un niveau de différence donné entre groupes représente une différence réelle :
+
+*** =left
+
+```{r echo=FALSE, fig.width=4.5, fig.height=6}
+dat <- data.frame(rnorm(10, mean=12, sd=5), rnorm(10, mean=15, sd=5),rnorm(10, mean=18, sd=5))
+par(mar=c(4,3,1,1))
+stripchart(dat,pch=1, vertical=T, las=1, method="jitter",group.names=paste("Gr ",1:3,sep=""))
+points(apply(dat,2,mean),pch=21,bg=2,cex=1.6)
+```
+
+*** =right
+
+```{r echo=FALSE, fig.width=4.5, fig.height=6}
+dat2 <- data.frame(rnorm(100, mean=12, sd=5), rnorm(100, mean=15, sd=5), rnorm(100, mean=18, sd=5))
+par(mar=c(4,3,1,1))
+stripchart(dat2,pch=1, vertical=T, las=1, method="jitter",group.names=paste("Gr ",1:3,sep=""))
+points(apply(dat2,2,mean),pch=21,bg=2,cex=1.6)
+```
+
+---
+
+## Les ANOVAs que nous allons décrire :
+
+<br/><br/>
+
+* ANOVA un facteur, groupes indépendants
+* ANOVA deux facteurs, groupes indépendants
+* ANOVA un facteur, mesures répétées
+* ANOVA deux facteurs, mesures mixtes
+* ANOVA deux facteurs, mesures répétées
+
+---
+
+## Les ANOVAs que nous allons décrire :
+
+<br/><br/>
+
+* <span style="color: #000000">ANOVA un facteur, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA un facteur, mesures répétées</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span>
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+Ici, seul un unique facteur peut potentiellement influencer nos données. Si le facteur en question n'a que 2 modalités, pas la peine de s'embêter avec une ANOVA : un test de comparaison de moyennes suffit !  
+
+Les hypothèses nulles et alternatives sont les mêmes que celles indiquées plus tôt.  
+
+Voyons un exemple. 3 groupes de sujets passent un test de statistiques noté sur 10. Le niveau de réussite est-il variable selon les groupes ? Voici les notes :
+
+```{r echo=FALSE}
+notes <- data.frame(Undergrad = c(6,5,6,7,6), Grad = c(8,9,8,9,6), Prof = c(10,8,10,8,9))
+notes
+```
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+Dans R, la façon correcte de présenter les données pour une ANOVA est la suivante :
+
+```{r echo=FALSE}
+notes <- stack(notes)
+colnames(notes) <- c("Notes","Groupe")
+notes$Groupe <- factor(notes$Groupe,levels=c("Undergrad","Grad","Prof"),ordered=TRUE)
+notes
+```
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+L'ANOVA est réalisée de la façon suivante :
+
+```{r}
+out <- aov(Notes~Groupe, data=notes)
+summary(out)
+```
+
+<br/>
+
+Puisque $p < \alpha$, nous concluons que le facteur testé a bien un effet sur la moyenne des groupes. Le niveau d'études a un effet sur la note obtenue au test.
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+<br/>
+
+Pour interpréter ce résultat, il faut revenir aux données et calculer la moyenne de chaque groupe : 
+```{r}
+tapply(notes$Notes, notes$Groupe, mean)
+```
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+<br/>
+
+À ce stade, plusieurs hypothèses sont toujours à tester :
+
+> * tous les groupes ont des résultats significativement différents les uns des autres
+> * les prof ont des résultats significativement meilleurs que les grad et undergrad, qui eux ont des résultats qui ne diffèrent pas significativement
+> * les prof et grad ont des résultats significativement meilleurs que les undergrad mais les résultats des prof et grad ne diffèrent pas significativement les uns des autres
+> * les prof et undergrad diffèrent significativement l'un de l'autre mais aucun des 2 groupes ne diffère des grad.
+> * aucun groupe ne diffère significativement des autres groupes
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+Pour trancher, nous avons donc besoin d'un test de comparaisons multiples. Dans le cas d'une ANOVA 1 facteur avec des groupes indépendants, et à supposer que les conditions d'applications de l'ANOVA étaient bien réunies, le test de Student est une solution adaptée, à condition de tenir compte de l'augmentation de l'erreur de type I : 
+
+```{r}
+pairwise.t.test(notes$Notes,notes$Groupe)
+```
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+### Conditions d'application
+
+> * Globalement, il y a toujours 3 conditions d'application à vérifier :
+    * Indépendance des échantillons
+    * Normalité de la distribution des données de chaque groupe
+    * Homogénéité des variances entre les groupes
+> * Dans la pratique, la condition d'indépendance est très importante et le choix d'un modèle d'ANOVA approprié est crucial. Ici, chaque sujet/individu ne peut appartenir/contribuer qu'à un seul groupe. Si un sujet fournit plusieurs scores, c'est l'ANOVA sur mesures répétées qu'il convient d'utiliser.
+> * Les tests de normalité sont très peu puissants quand $n$ est faible.
+> * Les tests d'homoscédasticité aussi !
+
+--- &twocol
+
+## ANOVA 1 facteur, groupes indépendants
+
+### Conditions d'application
+
+Dans la pratique, la normalité des données et l'homogénéité des variances est vérifiée grâce aux <span style="color: #ff0000">résidus</span> de l'ANOVA. Les conditions d'application ne peuvent donc être vérifiées qu'après l'analyse.
+
+*** =left
+
+```{r fig.height=4.5, fig.width=4.5, echo=2}
+par(mar=c(4,4,2,1))
+plot(out,which= 2)
+```
+
+
+*** =right
+```{r fig.height=4.5, fig.width=4.5, echo=2}
+par(mar=c(4,4,2,1))
+plot(out,which=1)
+```
+
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+### Conditions d'application
+
+Ici, les résidus semblent homogènes, mais ils ne suivent pas la loi normale :
+
+```{r}
+shapiro.test(out$residuals)
+```
+
+Il faudrait donc :
+> * soit transformer les données
+> * soit faire un équivalent non paramétrique de l'ANOVA
+> * soit passer outre en consdérant que l'ANOVA est assez robuste : les résultats restent valides même si ces 2 conditions d'application sont <span style="color: #ff0000">un peu violées mais pas en même temps</span> !
+
+---
+
+## ANOVA 1 facteur, groupes indépendants
+
+### Conditions d'application
+
+Puisque les résidus ne suivent pas la loi normale, il semble plus raisonnable d'utiliser le test de Wilcoxon en guise de test de comparaisons multiples :
+
+```{r warning=FALSE}
+pairwise.wilcox.test(notes$Notes,notes$Groupe)
+```
+
+---
+
+## Les ANOVAs que nous allons décrire :
+
+<br/><br/>
+
+* <span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span>
+* <span style="color: #000000">ANOVA deux facteurs, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA un facteur, mesures répétées</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span>
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+Ici, deux facteurs peuvent potentiellement influencer la variable expliquée. Sachant que chaque facteur peut avoir deux modalités ou plus, le nombre de cas à examiner peut rapidement augmenter.  
+
+Puisque les groupes sont ici indépendants, chaque sujet/individu ne fournit qu'<span style="color: #ff0000">un seul score</span>.  
+
+Voici un exemple de design expérimental pour 2 facteurs et 2 modalités par facteur :
+
+```{r echo=FALSE, results='asis', comment=NA}
+
+dat <- matrix(c(8,11,8,9,16,18,17,17,6,7,8,7,12,11,12,9),ncol=2,dimnames=list(c("Undergrad"," ","  ","   ","Grad","    ","     ","      "),c("Teach.meth.1","Teach.meth.2")))
+
+library(xtable)
+options(xtable.type = 'html')
+
+xtable(dat)
+
+```
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+Comme précédemment, la façon correcte de présenter ces données dans R est la suivante :
+
+```{r echo=FALSE}
+
+dat <- data.frame(Notes = c(8,11,8,9,16,18,17,17,6,7,8,7,12,11,12,9), Teaching = rep(c("Method.1","Method.2"),each=8), Students = rep(c("Undergrad","Grad"),each=4,times=2))
+
+dat
+
+```
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+Ici, nous allons tenter de déterminer si (i) la note moyenne obtenue diffère selon le niveau d'études, (ii) la note moyenne obtenue diffère selon la méthode d'enseignement et (iii) les 2 méthodes ont la même efficacité pour enseigner aux étudiants des 2 niveaux.  
+
+Il y aura donc 3 groupes d'hypothèses qui seront testées simultanément : 
+> * $H_0$ : le niveau d'étude n'influence pas la moyenne obtenue
+> * $H_1$ : le niveau d'étude influence la moyenne obtenue
+
+<br/>
+> * $H_0$ : la méthode d'enseignement n'influence pas la moyenne obtenue
+> * $H_1$ : la méthode d'enseignement influence la moyenne obtenue
+
+<br/>
+> * $H_0$ : la méthode d'enseignement influence de la même façon les 2 groupes d'étudiants
+> * $H_1$ : la méthode d'enseignement influence de façon différente les 2 groupes d'étudiants
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+```{r}
+out <- aov(Notes~Students*Teaching, data=dat)
+summary(out)
+```
+
+Les 3 hypothèses nulles sont donc validées. L'interprétation est aisée puisque chaque facteur n'a que 2 modalités. S'ils en avaient plus, il faudrait recourrir aux tests de comparaisons multiples.
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+### Comparaisons multiples
+
+```{r tidy=FALSE}
+TukeyHSD(out,"Students")
+```
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+### Comparaisons multiples
+
+```{r tidy=FALSE}
+TukeyHSD(out,"Teaching")
+```
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+### Comparaisons multiples
+
+```{r tidy=FALSE}
+TukeyHSD(out,"Students:Teaching")
+```
+
+--- &vcenter
+
+## ANOVA 2 facteurs, groupes indépendants
+
+### Visualiser les effets et les interactions
+
+```{r echo=FALSE,fig.width=5,fig.height=7}
+moy <- tapply(dat$Notes,list(dat$Teaching,dat$Students),mean)
+
+M1.U <- dat$Notes[1:4]
+M2.U <- dat$Notes[9:12]
+M1.G <- dat$Notes[5:8]
+M2.G <- dat$Notes[13:16]
+par(mar=c(4,4,1,1))
+stripchart(data.frame(M1.U,M2.U), vertical=T, pch=1,method="jitter",las=1,ylim=range(dat$Notes),group.names=c("Method 1","Method 2"),ylab="Notes")
+stripchart(data.frame(M1.G,M2.G), vertical=T, pch=19,method="jitter",las=1,add=TRUE)
+
+lines(1:2,moy[,1],pch=21,bg="red",type="o")
+points(1:2,moy[,2],pch=1,col="red")
+lines(1:2,moy[,2])
+
+legend("topright",legend=c("Grad","Undergrad"),pch=c(19,1))
+
+```
+
+--- &twocol
+
+## ANOVA 2 facteurs, groupes indépendants
+
+### Vérification des conditions d'application
+
+Évidemment, tout ceci suppose que les conditions d'applications soient vérifiées :
+
+*** =left
+
+```{r fig.height=4.5, fig.width=4.5, echo=2}
+par(mar=c(4,4,2,1))
+plot(out,which= 2)
+```
+
+
+*** =right
+```{r fig.height=4.5, fig.width=4.5, echo=2}
+par(mar=c(4,4,2,1))
+plot(out,which=1)
+```
+
+
+---
+
+## ANOVA 2 facteurs, groupes indépendants
+
+### Vérification des conditions d'application
+
+Les résidus semblent homogènes et ils sont distribués normalement :
+
+```{r}
+shapiro.test(out$residuals)
+```
+
+C'est donc tout bon !
+
+---
+
+## Les ANOVAs que nous allons décrire :
+
+<br/><br/>
+
+* <span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span>
+* <span style="color: #000000">ANOVA un facteur, mesures répétées</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span>
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+Ici, chaque sujet fournit <span style="color: #ff0000">plusieurs scores : un pour chaque modalité</span> du facteur étudié.  
+
+Exemple : 4 individus subissent un test par semaine pendant 3 semaines.
+
+```{r echo=FALSE, results='asis', comment=NA}
+
+dat <- matrix(c(2,4,5,5,5,4,8,7,8,9,10,9),ncol=3,dimnames=list(paste("subject.",1:4,sep=""),paste("Week.",1:3,sep="")))
+xtable(dat)
+```
+
+</br>
+En fait, on peut considérer qu'il s'agit d'une ANOVA 2 facteurs avec un facteur fixe (Semaine) et un facteur aléatoire (Sujet). Dans la pratique, seul le facteur Semaine nous intéresse. C'est un facteur fixe car si nous devions refaire la même expérience, les mêmes dates pourraient être choisies.
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+La présentation correcte des données dans R est la suivante :
+
+```{r echo=FALSE}
+dat <- data.frame(Notes=as.vector(dat),Week=factor(rep(1:3,each=4)),Subject=factor(rep(1:4,3)))
+dat
+
+```
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+Ici, les hypothèses nulles et alternatives sont les suivantes :
+
+* $H_0$ Les notes ne varient pas avec le temps ; $H_1$ Les notes varient avec le temps
+
+```{r}
+out <- aov(Notes~Week + Error(Subject) , data=dat)
+summary(out)
+```
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+Il est possible de calculer "à la main" la valeur de probabilité associée à une valeur de $F$ et des degrés de liberté donnés.
+
+```{r echo=2}
+summary(out$Within)
+1 - pf(32.6,2,6)
+```
+
+Ça sera utile pour calculer une $p-$value corrigée si l'une des conditions d'application n'est pas vérifiée.  
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+</br>
+Car tous les modèles d'ANOVA avec mesures répétées possèdent une condition d'application supplémentaire : <span style="color: #ff0000">la sphéricité</span> (sphéritude ?) qui peut être testée avec le <span style="color: #ff0000">test de Mauchly</span> (mais souvent problématique selon la taille d'échantillon). 
+  
+
+Si les données ne sont pas sphériques, l'erreur de type I peut fortement augmenter. On peut alors :
+
+> * transformer les données
+> * corriger les p-values obtenues grâce au calcul d'$\varepsilon$
+> * passer par la procédure de MANOVA (ANOVA multivariée)
+> * aller boire un coup
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+Puisque le test de Mauchly est <span style="color: #ff0000">très critiqué</span>, la méthode du calcul d'$\varepsilon$ est généralement utilisée.  
+
+$\varepsilon$ mesure la sphéricité et varie entre 1 (données sphériques, tout va bien) et $\frac{1}{k-1}$ avec $k$ égal au nombre de mesures répétées (ici, $k=3$).  
+
+$\varepsilon$ permet alors de corriger la $p-$value de l'ANOVA. Pour cela, on multiplie simplement les degrés de liberté par $\frac{1}{k-1}$. La $p-$value devient donc :
+
+```{r}
+1 - pf(32.6,2*0.5,6*0.5)
+```
+
+au lieu de 
+
+```{r echo=FALSE}
+1 - pf(32.6,2,6)
+```
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+<br/>
+
+Pour interpréter ce résultat, il faut revenir aux données et calculer la moyenne de chaque groupe : 
+```{r}
+tapply(dat$Notes, dat$Week, mean)
+```
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+<br/>
+
+À ce stade, plusieurs hypothèses sont toujours à tester :
+
+* tous les groupes ont des résultats significativement différents les uns des autres
+* les prof ont des résultats significativement meilleurs que les grad et undergrad, qui eux ont des résultats qui ne diffèrent pas significativement
+* les prof et grad ont des résultats significativement meilleurs que les undergrad mais les résultats des prof et grad ne diffèrent pas significativement les uns des autres
+* les prof et undergrad diffèrent significativement l'un de l'autre mais aucun des 2 groupes ne diffère des grad.
+* aucun groupe ne diffère significativement des autres groupes
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+Pour trancher, nous avons donc besoin d'un test de comparaisons multiples. Dans le cas d'une ANOVA 1 facteur avec des mesures répétées, et à supposer que les conditions d'applications de l'ANOVA étaient bien réunies, le <span style="color: #ff0000">test de Student sur données appariées</span> est une solution adaptée, à condition de tenir compte de l'augmentation de l'erreur de type I : 
+
+```{r}
+pairwise.t.test(dat$Notes,dat$Week,paired=TRUE)
+```
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+### La puissance de l'ANOVA
+
+Le choix d'un design expérimental a des conséquences sur le type d'analyse statistique qu'il sera possible de réaliser. Or toutes les analyses n'ont pas la même puissance.
+
+Le modèle d'ANOVA un facteur sur mesures répétées est <span style="color: #ff0000">plus puissant</span> que le modèle un facteur groupes indépendants. 
+
+Exemple :
+
+```{r results='asis',echo=FALSE}
+dat <- matrix(c(11,8,5,4,12,10,8,6,13,12,11,8),ncol=3,dimnames=list(NULL,1:3))
+tab <- xtable(dat)
+print.xtable(tab,include.rownames=FALSE)
+dat <- data.frame(Notes=c(11,8,5,4,12,10,8,6,13,12,11,8), Week=rep(c("W1","W2","W3"),each=4), Subject=rep(paste("Sub",1:4,sep=""),3))
+```
+
+---
+
+## ANOVA 1 facteur, mesures répétées
+
+### La puissance de l'ANOVA
+
+```{r}
+summary(aov(Notes~Week + Error(Subject) , data=dat)$Within)
+```
+
+
+```{r}
+summary(aov(Notes~Week , data=dat))
+```
+
+---
+
+## Les ANOVAs que nous allons décrire :
+
+<br/><br/>
+
+* <span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA un facteur, mesures répétées</span>
+* <span style="color: #000000">ANOVA deux facteurs, mesures mixtes</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span>
+
+---
+
+## ANOVA 2 facteurs, mesures mixtes
+
+Ici, les individus sont répartis en plusieurs groupes selon un facteur et chaque individu fournit nevaleur pour chaque modalité du second facteur.
+
+Exemple : test de l'effet d'une drogue X au cours du temps sur les capacités cognitives. Comparaison d'un groupe traité avec un groupe témoin.
+
+```{r echo=FALSE, results='asis'}
+
+dat <- matrix(c(28,23,25,24,28,24,23,21,25,30,30,35,22,23,26,21,34,32,35,39,24,22,21,21),ncol=3,dimnames=list(c(paste("Drug.Subject",1:4,sep=""),paste("Placebo.Subject",5:8,sep="")), c("T10","T20","T30")))
+xtable(dat)
+
+```
+
+---
+
+## ANOVA 2 facteurs, mesures mixtes
+
+Comme pour l'ANOVA 2 facteurs sur groupes indépendants, il y a 3 couples d'hypothèses :
+
+> * $H_0$ : la drogue X n'a pas d'effet sur les capacités cognitives
+> * $H_1$ : la drogue X a un effet sur les capacités cognitives
+
+</br>
+> * $H_0$ : les capacités cognitives sont constantes au cours du temps
+> * $H_1$ : les capacités cognitives sont variables au cours du temps
+
+</br>
+> * $H_0$ : les capacités cognitives évoluent de la même façon au cours du temps avec et sans drogue X
+> * $H_1$ : les capacités cognitives évoluent différemment au cours du temps avec et sans drogue X
+
+--- &twocol
+
+## ANOVA 2 facteurs, mesures mixtes
+
+Mise en forme pour travailler dans R :
+
+*** =left
+
+```{r echo=FALSE}
+dat <- data.frame(Reaction = c(28,23,25,24,28,24,23,21,25,30,30,35,22,23,26,21,34,32,35,39,24,22,21,21), Time=rep(c("T10","T20","T30"),each=8), Drug = rep(c("X","Placebo"),each=4,times=3), Subject = rep(paste("Subject.",1:8,sep=""),3))
+dat[1:12,]
+```
+
+*** =right
+
+```{r echo=FALSE}
+dat[13:24,]
+```
+
+---
+
+## ANOVA 2 facteurs, mesures mixtes
+
+```{r}
+out <- aov(Reaction ~ Time*Drug + Error(Subject), data=dat)
+summary(out)
+```
+
+---
+
+## ANOVA 2 facteurs, mesures mixtes
+
+Ici, on rejette $H_0$ systématiquement. Toutefois, si l'on ajuste le calcul des $p-$ value pour tenir compte de la (non) sphéricité pour le facteur répété, les conclusions changent :
+
+```{r echo=2:3}
+summary(out$Within)
+1-pf(4.645,1,6)
+1-pf(10.452,1,6)
+```
+
+---
+
+## ANOVA 2 facteurs, mesures mixtes
+
+### Interprétation des résultats
+
+Pour interpréter ces résultats, on peut calculer les moyennes par catégorie
+
+```{r}
+tapply(dat$Reaction,list(dat$Drug,dat$Time),mean)
+```
+
+---
+
+## ANOVA 2 facteurs, mesures mixtes
+
+### Interprétation des résultats
+
+On peut aussi faire le graphique des interactions
+
+```{r echo=2, fig.width=8, fig.height=5}
+par(mar=c(4,4,1,1))
+with(dat,interaction.plot(Time,Drug,Reaction,type="b",pch=c(1,19)))
+```
+
+---
+
+## ANOVA 2 facteurs, mesures mixtes
+
+### Interprétation des résultats
+
+Nous pouvons donc conclure que le temps nécessaire à la réalisation du test cognitif prend en moyenne `r mean(dat$Reaction[dat$Drug=="X"])` secondes pour les sujets ayant reçu la drogue X, contre `r mean(dat$Reaction[dat$Drug=="Placebo"])` secondes pour les sujets sous placébo, ce qui est significatif au seuil $\alpha =$ 0.01 ($p=$ `r summary(out$Subject)[[1]][1,5]`).
+
+</br>
+Le temps de réaction augmente (les performances se dégradent) avec le temps puisque les temps de réaction moyens sont les suivants :
+```{r echo=FALSE}
+tapply(dat$Reaction,dat$Time,mean)
+```
+Cette dégradation des performances n'est pas significative au seuil $\alpha =$ 0.05 ($p=$ `r 1 - pf(4.645, 1, 6)`) 
+
+</br>
+Les performances des sujets sous placébo s'améliorent faiblement avec le temps alors qu'elle diminuent fortement chez les patients traités avec la drogue X. Cet effet est significatif au seuil $\alpha =$ 0.05 ($p=$ `r 1 - pf(10.452, 1, 6)`)
+
+---
+
+## Les ANOVAs que nous allons décrire :
+
+<br/><br/>
+
+* <span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span>
+* <span style="color: #cccccc">ANOVA un facteur, mesures répétées</span>
+* <span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span>
+* <span style="color: #000000">ANOVA deux facteurs, mesures répétées</span>
+
+---
+
+## ANOVA 2 facteurs, mesures répétées
+
+</br>
+Ici, chaque individu fournit un score pour chaque combinaison de modalité des 2 facteurs étudiés. Comme pour l'ANOVA 1 facteur, ce design est beaucoup plus puissant que l'ANOVA 2 facteurs sur groupes indépendants.
+
+Exemple : capacité de détecter certains sons (haute ou basse fréquence) en fonction de la présence d'un bruit de fond à haute ou basse fréquence. Chaque sujet fait 2 seesions d'écoute, une dans chaque condition de bruit de fond. Pour chaque session, les sujets sont soumis à 30 stimuli haute fréquence et 30 stimuli basse fréquence. Le score correspond au nombre de stimuli détecté dans chaque condition.
+
+</br>
+Le questionnement scientifique est le suivant : est-ce que le bruit de fond affecte la capacité des sujets à détecter différents stimuli ?
+
+---
+
+## ANOVA 2 facteurs, mesures répétées
+
+### Les données
+
+```{r echo=FALSE, results='asis'}
+dat <- matrix(c(12,9,9,10,9,11,18,20,22,22,17,23,20,24,16,18,18,22,8,10,9,11,10,12),ncol=4,dimnames=list(paste("S",1:6,sep=""),c("Bg.low","Bg.Low","Bg.High","Bg.High")))
+dat <- rbind(c("Stim.Low","Stim.High","Stim.Low","Stim.High"),dat)
+xtable(dat)
+```
+
+---
+
+## ANOVA 2 facteurs, mesures répétées
+
+### Hypothèses
+
+> * $H_0$ : le bruit de fond n'a pas d'effet sur les capacités de détection
+> * $H_1$ : le bruit de fond affecte les capacités de détection
+
+</br>
+> * $H_0$ : la fréquence du stimulus n'affecte pas la capacité de détection
+> * $H_1$ : la fréquence du stimulus affecte la capacité de détection
+
+</br>
+> * $H_0$ : la qualité du bruit de fond affecte de la même façon la capacité de détection de stimuli à différentes fréquences
+> * $H_1$ : la qualité du bruit de fond affecte de façon différente la capacité de détection de stimuli à différentes fréquences
+
+--- &twocol
+
+## ANOVA 2 facteurs, mesures répétées
+
+### Mise en forme des données pour R :
+
+*** =left
+
+```{r echo=FALSE}
+dat <- data.frame(Score = c(12,9,9,10,9,11,18,20,22,22,17,23,20,24,16,18,18,22,8,10,9,11,10,12),Noise = rep(c("Low","High"),each=12),Stimulus = rep(c("Low","High","Low","High"),each=6),Subject = rep(paste("Subject.",1:6,sep=""),4))
+dat[1:12,]
+```
+
+*** =right
+
+```{r echo=FALSE}
+dat[13:24,]
+```
+
+---
+
+## ANOVA 2 facteurs, mesures répétées
+
+### Réalisation de l'ANOVA :
+
+```{r results='hide'}
+out <- aov(Score~Noise*Stimulus + Error(Subject/(Noise*Stimulus)), data=dat)
+summary(out)
+```
+
+---
+
+## ANOVA 2 facteurs, mesures répétées
+
+```{r echo=FALSE}
+summary(out)
+```
+
+---
+
+## ANOVA 2 facteurs, mesures répétées
+
+### Interprétation
+
+</br>
+Ici, chaque facteur n'a que 2 modalités : pas de problème de sphéricité.  
+
+</br>
+> 1. Bruit de fond : nous n'avons aucune preuve que la qualité du bruit de fond affecte la capacité de détection des stimuli
+> 2. Stimulus : nous n'avons aucune preuve que la capacité de détection d'un stimulus soit liée à la fréquence du stimulus
+> 3. Interaction : nous avons la preuve ($p <<$ 0.001) que la capacité de détecter un stimulus de haute ou basse fréquence dépend de la qualité du bruit de fond.
+
+--- &vcenter
+
+## ANOVA 2 facteurs, mesures répétées
+
+```{r echo=2, fig.width=7, fig.height=7}
+par(mar=c(4,4,1,1))
+with(dat,interaction.plot(Noise,Stimulus,Score,type="b",pch=c(1,19)))
+```
+
+---
+
+## Les ANOVAs que nous ~~allons décrire~~ avons décrites :
+
+<br/><br/>
+
+* ANOVA un facteur, groupes indépendants
+* ANOVA deux facteurs, groupes indépendants
+* ANOVA un facteur, mesures répétées
+* ANOVA deux facteurs, mesures mixtes
+* ANOVA deux facteurs, mesures répétées
+
+---
+
+## Les ANOVAs ou méthodes proches que pourrions décrire :
+
+<br/><br/>
+
+> * ANOVA hiérarchiques
+> * ANOVA k facteurs : bon courage pour l'interprétation
+> * ANOVA "unbalanced"
+> * MANOVA (Anova multivariées)
+> * ANCOVA (Analyse de covariance)
+> * AMOVA (Analyse de variance moléculaire)
+

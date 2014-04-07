@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>L'analyse de variance</title>
+  <meta charset="utf-8">
+  <meta name="description" content="L'analyse de variance">
+  <meta name="author" content="Benoit Simon-Bouhet">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/solarized_light.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>L'analyse de variance</h1>
+    <h2>Une introduction...</h2>
+    <p>Benoit Simon-Bouhet<br/>Journal club, 21 février 2014</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>L&#39;ANOVA : pour quoi faire ?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/></p>
+
+<ul class = "build incremental">
+<li>Pour chaque test statistique, plusieurs choses sont fixées :
+
+<ol>
+<li>les hypothèses nulles et alternatives</li>
+<li>le seuil \(\alpha\), souvent fixé à 5% par convention</li>
+</ol></li>
+<li>\(\alpha\) est l&#39;erreur de type I : la probabilité de rejeter <em>à tort</em> \(H_0\)</li>
+</ul>
+
+<p><br/></p>
+
+<ul class = "build incremental">
+<li>PROBLÈME : les erreurs <span style="color: #ff0000; font-size: 30pt">s&#39;ajoutent</span> toujours !</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>L&#39;ANOVA : pour quoi faire ?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/></p>
+
+<p>Au bout de combien de tests est-on certain de s&#39;être trompé quelque part ?</p>
+
+<ul class = "build incremental">
+<li>Comparer la moyenne de <span style="color: #ff0000">2</span> échantillons requiert <span style="color: #ff0000">1</span> test</li>
+<li>Comparer la moyenne de <span style="color: #ff0000">3</span> échantillons requiert <span style="color: #ff0000">3</span> tests</li>
+<li>Comparer la moyenne de <span style="color: #ff0000">4</span> échantillons requiert <span style="color: #ff0000">6</span> tests</li>
+<li>Comparer la moyenne de <span style="color: #ff0000">5</span> échantillons requiert <span style="color: #ff0000">10</span> tests</li>
+<li>Comparer la moyenne de <span style="color: #ff0000">6</span> échantillons requiert <span style="color: #ff0000">15</span> tests</li>
+<li>Comparer la moyenne de <span style="color: #ff0000">7</span> échantillons requiert <span style="color: #ff0000">21</span> tests</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>L&#39;ANOVA : pour quoi faire ?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/></p>
+
+<p>L&#39;ANOVA permet de comparer la moyenne de \(k\) échantillons en <span style="color: #ff0000">un seul test</span> (ou presque !).</p>
+
+<p><br/></p>
+
+<p>Pour l&#39;ANOVA la plus simple (ANOVA 1 facteur), les hypothèses sont les suivantes :</p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : le facteur étudié n&#39;a pas d&#39;effet sur la moyenne des échantillons</li>
+<li>\(H_1\) : le facteur étudié a un effet sur la moyenne des échantillons</li>
+</ul>
+
+<p><br/></p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : la moyenne de tous les échantillons est identique</li>
+<li>\(H_1\) : <span style="color: #ff0000">au moins</span> un échantillon a une moyenne différente des autres</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>ANOVA et régression</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Construire un <span style="color: #ff0000">modèle d&#39;ANOVA</span> c&#39;est exactement comme construire un modèle de régression. Il faut :</p>
+
+<ul class = "build incremental">
+<li>respecter des conditions d&#39;application (détails plus loin)</li>
+<li>disposer d&#39;une variable expliquée quantitative (et continue)</li>
+<li>disposer d&#39;une ou plusieurs variables explicatives pouvant potentiellement influencer la variable expliquée (c&#39;est ce qu&#39;on cherche à déterminer)</li>
+<li>avoir une idée de la façon dont les variables explicatives peuvent se combiner pour influencer la variable expliquée (effets additifs, multiplicatifs, autres ?)</li>
+</ul>
+
+<p><br/></p>
+
+<ul class = "build incremental">
+<li>Une différence de taille toutefois : pour la régression, les variables explicatives sont toutes quantitatives (et continues), pour l&#39;ANOVA, les variables explicatives sont toutes qualititives (factorielles, nominales).</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="fill" id="slide-5" style="background:;">
+  <article data-timings="">
+    <iframe src = './maths.jpg'></iframe>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-6" style="background:;">
+  <hgroup>
+    <h2>Les grands principes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Quand on souhaite comparer la moyenne de plusieurs groupes, il est important de distinguer plusieurs sources de variation : </p>
+
+<h3>La variation intra groupe</h3>
+
+<p>Puisque les individus d&#39;un groupe donné subissent tous les même traitements, la variation observée ici est indépendante des facteurs étudiés et n&#39;est donc due qu&#39;à la variation naturelle. C&#39;est la variation liée au hasard que les anglo-saxons nomment <span style="color: #ff0000">error variance</span>.</p>
+
+<h3>La variation inter groupes</h3>
+
+<p>Elle représente la variation systématique due au(x) facteur(s) qui nous intéresse(nt). C&#39;est la manifestation de l&#39;effet qui nous intéresse : <span style="color: #ff0000">effect variance</span>.</p>
+
+<p>Si l&#39;<span style="color: #ff0000">effect variance</span> est grande devant l&#39;<span style="color: #ff0000">error variance</span>, on aura tendance à conclure (à bon escient) que les groupes étudiés diffèrent. </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-7" style="background:;">
+  <hgroup>
+    <h2>Les grands principes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Toutes choses étant égales par ailleurs, plus la variation intra groupe sera grande, moins il sera facile de distinguer les groupes</p>
+
+<div style='float:left;width:48%;'>
+  <p><img src="figure/unnamed-chunk-2.png" alt="plot of chunk unnamed-chunk-2"> </p>
+
+</div>
+<div style='float:right;width:48%;'>
+  <p><img src="figure/unnamed-chunk-3.png" alt="plot of chunk unnamed-chunk-3"> </p>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-8" style="background:;">
+  <hgroup>
+    <h2>Les grands principes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Toutes choses étant égales par ailleurs, plus la variation inter groupes sera faible, moins il sera facile de distinguer les groupes</p>
+
+<div style='float:left;width:48%;'>
+  <p><img src="figure/unnamed-chunk-4.png" alt="plot of chunk unnamed-chunk-4"> </p>
+
+</div>
+<div style='float:right;width:48%;'>
+  <p><img src="figure/unnamed-chunk-5.png" alt="plot of chunk unnamed-chunk-5"> </p>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-9" style="background:;">
+  <hgroup>
+    <h2>Les grands principes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Enfin, le troisième élément important est \(n\), le nombre d&#39;observations dans chaque groupe. Toutes choses étant égales par ailleurs, plus \(n\) sera grand, plus nous aurons de raisons de penser qu&#39;un niveau de différence donné entre groupes représente une différence réelle :</p>
+
+<div style='float:left;width:48%;'>
+  <p><img src="figure/unnamed-chunk-6.png" alt="plot of chunk unnamed-chunk-6"> </p>
+
+</div>
+<div style='float:right;width:48%;'>
+  <p><img src="figure/unnamed-chunk-7.png" alt="plot of chunk unnamed-chunk-7"> </p>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-10" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs que nous allons décrire :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul>
+<li>ANOVA un facteur, groupes indépendants</li>
+<li>ANOVA deux facteurs, groupes indépendants</li>
+<li>ANOVA un facteur, mesures répétées</li>
+<li>ANOVA deux facteurs, mesures mixtes</li>
+<li>ANOVA deux facteurs, mesures répétées</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-11" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs que nous allons décrire :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul>
+<li><span style="color: #000000">ANOVA un facteur, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA un facteur, mesures répétées</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-12" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Ici, seul un unique facteur peut potentiellement influencer nos données. Si le facteur en question n&#39;a que 2 modalités, pas la peine de s&#39;embêter avec une ANOVA : un test de comparaison de moyennes suffit !  </p>
+
+<p>Les hypothèses nulles et alternatives sont les mêmes que celles indiquées plus tôt.  </p>
+
+<p>Voyons un exemple. 3 groupes de sujets passent un test de statistiques noté sur 10. Le niveau de réussite est-il variable selon les groupes ? Voici les notes :</p>
+
+<pre><code>  Undergrad Grad Prof
+1         6    8   10
+2         5    9    8
+3         6    8   10
+4         7    9    8
+5         6    6    9
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-13" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Dans R, la façon correcte de présenter les données pour une ANOVA est la suivante :</p>
+
+<pre><code>   Notes    Groupe
+1      6 Undergrad
+2      5 Undergrad
+3      6 Undergrad
+4      7 Undergrad
+5      6 Undergrad
+6      8      Grad
+7      9      Grad
+8      8      Grad
+9      9      Grad
+10     6      Grad
+11    10      Prof
+12     8      Prof
+13    10      Prof
+14     8      Prof
+15     9      Prof
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-14" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>L&#39;ANOVA est réalisée de la façon suivante :</p>
+
+<pre><code class="r">out &lt;- aov(Notes ~ Groupe, data = notes)
+summary(out)
+</code></pre>
+
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)   
+Groupe       2   23.3    11.7    11.7 0.0015 **
+Residuals   12   12.0     1.0                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+<p><br/></p>
+
+<p>Puisque \(p < \alpha\), nous concluons que le facteur testé a bien un effet sur la moyenne des groupes. Le niveau d&#39;études a un effet sur la note obtenue au test.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-15" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/></p>
+
+<p>Pour interpréter ce résultat, il faut revenir aux données et calculer la moyenne de chaque groupe : </p>
+
+<pre><code class="r">tapply(notes$Notes, notes$Groupe, mean)
+</code></pre>
+
+<pre><code>Undergrad      Grad      Prof 
+        6         8         9 
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-16" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/></p>
+
+<p>À ce stade, plusieurs hypothèses sont toujours à tester :</p>
+
+<ul class = "build incremental">
+<li>tous les groupes ont des résultats significativement différents les uns des autres</li>
+<li>les prof ont des résultats significativement meilleurs que les grad et undergrad, qui eux ont des résultats qui ne diffèrent pas significativement</li>
+<li>les prof et grad ont des résultats significativement meilleurs que les undergrad mais les résultats des prof et grad ne diffèrent pas significativement les uns des autres</li>
+<li>les prof et undergrad diffèrent significativement l&#39;un de l&#39;autre mais aucun des 2 groupes ne diffère des grad.</li>
+<li>aucun groupe ne diffère significativement des autres groupes</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-17" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Pour trancher, nous avons donc besoin d&#39;un test de comparaisons multiples. Dans le cas d&#39;une ANOVA 1 facteur avec des groupes indépendants, et à supposer que les conditions d&#39;applications de l&#39;ANOVA étaient bien réunies, le test de Student est une solution adaptée, à condition de tenir compte de l&#39;augmentation de l&#39;erreur de type I : </p>
+
+<pre><code class="r">pairwise.t.test(notes$Notes, notes$Groupe)
+</code></pre>
+
+<pre><code>
+    Pairwise comparisons using t tests with pooled SD 
+
+data:  notes$Notes and notes$Groupe 
+
+     Undergrad Grad  
+Grad 0.0164    -     
+Prof 0.0014    0.1398
+
+P value adjustment method: holm 
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-18" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Conditions d&#39;application</h3>
+
+<ul class = "build incremental">
+<li>Globalement, il y a toujours 3 conditions d&#39;application à vérifier :
+
+<ul>
+<li>Indépendance des échantillons</li>
+<li>Normalité de la distribution des données de chaque groupe</li>
+<li>Homogénéité des variances entre les groupes</li>
+</ul></li>
+<li>Dans la pratique, la condition d&#39;indépendance est très importante et le choix d&#39;un modèle d&#39;ANOVA approprié est crucial. Ici, chaque sujet/individu ne peut appartenir/contribuer qu&#39;à un seul groupe. Si un sujet fournit plusieurs scores, c&#39;est l&#39;ANOVA sur mesures répétées qu&#39;il convient d&#39;utiliser.</li>
+<li>Les tests de normalité sont très peu puissants quand \(n\) est faible.</li>
+<li>Les tests d&#39;homoscédasticité aussi !</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-19" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Conditions d&#39;application</h3>
+
+<p>Dans la pratique, la normalité des données et l&#39;homogénéité des variances est vérifiée grâce aux <span style="color: #ff0000">résidus</span> de l&#39;ANOVA. Les conditions d&#39;application ne peuvent donc être vérifiées qu&#39;après l&#39;analyse.</p>
+
+<div style='float:left;width:48%;'>
+  <pre><code class="r">plot(out, which = 2)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-13.png" alt="plot of chunk unnamed-chunk-13"> </p>
+
+</div>
+<div style='float:right;width:48%;'>
+  <pre><code class="r">plot(out, which = 1)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-14.png" alt="plot of chunk unnamed-chunk-14"> </p>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-20" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Conditions d&#39;application</h3>
+
+<p>Ici, les résidus semblent homogènes, mais ils ne suivent pas la loi normale :</p>
+
+<pre><code class="r">shapiro.test(out$residuals)
+</code></pre>
+
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  out$residuals
+W = 0.8618, p-value = 0.02565
+</code></pre>
+
+<p>Il faudrait donc :</p>
+
+<ul class = "build incremental">
+<li>soit transformer les données</li>
+<li>soit faire un équivalent non paramétrique de l&#39;ANOVA</li>
+<li>soit passer outre en consdérant que l&#39;ANOVA est assez robuste : les résultats restent valides même si ces 2 conditions d&#39;application sont <span style="color: #ff0000">un peu violées mais pas en même temps</span> !</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-21" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Conditions d&#39;application</h3>
+
+<p>Puisque les résidus ne suivent pas la loi normale, il semble plus raisonnable d&#39;utiliser le test de Wilcoxon en guise de test de comparaisons multiples :</p>
+
+<pre><code class="r">pairwise.wilcox.test(notes$Notes, notes$Groupe)
+</code></pre>
+
+<pre><code>
+    Pairwise comparisons using Wilcoxon rank sum test 
+
+data:  notes$Notes and notes$Groupe 
+
+     Undergrad Grad 
+Grad 0.079     -    
+Prof 0.032     0.273
+
+P value adjustment method: holm 
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-22" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs que nous allons décrire :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul>
+<li><span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span></li>
+<li><span style="color: #000000">ANOVA deux facteurs, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA un facteur, mesures répétées</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-23" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Ici, deux facteurs peuvent potentiellement influencer la variable expliquée. Sachant que chaque facteur peut avoir deux modalités ou plus, le nombre de cas à examiner peut rapidement augmenter.  </p>
+
+<p>Puisque les groupes sont ici indépendants, chaque sujet/individu ne fournit qu&#39;<span style="color: #ff0000">un seul score</span>.  </p>
+
+<p>Voici un exemple de design expérimental pour 2 facteurs et 2 modalités par facteur :</p>
+
+<!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
+
+<!-- Sun Mar  2 18:14:17 2014 -->
+
+<TABLE border=1>
+<TR> <TH>  </TH> <TH> Teach.meth.1 </TH> <TH> Teach.meth.2 </TH>  </TR>
+  <TR> <TD align="right"> Undergrad </TD> <TD align="right"> 8.00 </TD> <TD align="right"> 6.00 </TD> </TR>
+  <TR> <TD align="right">   </TD> <TD align="right"> 11.00 </TD> <TD align="right"> 7.00 </TD> </TR>
+  <TR> <TD align="right">    </TD> <TD align="right"> 8.00 </TD> <TD align="right"> 8.00 </TD> </TR>
+  <TR> <TD align="right">     </TD> <TD align="right"> 9.00 </TD> <TD align="right"> 7.00 </TD> </TR>
+  <TR> <TD align="right"> Grad </TD> <TD align="right"> 16.00 </TD> <TD align="right"> 12.00 </TD> </TR>
+  <TR> <TD align="right">      </TD> <TD align="right"> 18.00 </TD> <TD align="right"> 11.00 </TD> </TR>
+  <TR> <TD align="right">       </TD> <TD align="right"> 17.00 </TD> <TD align="right"> 12.00 </TD> </TR>
+  <TR> <TD align="right">        </TD> <TD align="right"> 17.00 </TD> <TD align="right"> 9.00 </TD> </TR>
+   </TABLE>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-24" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Comme précédemment, la façon correcte de présenter ces données dans R est la suivante :</p>
+
+<pre><code>   Notes Teaching  Students
+1      8 Method.1 Undergrad
+2     11 Method.1 Undergrad
+3      8 Method.1 Undergrad
+4      9 Method.1 Undergrad
+5     16 Method.1      Grad
+6     18 Method.1      Grad
+7     17 Method.1      Grad
+8     17 Method.1      Grad
+9      6 Method.2 Undergrad
+10     7 Method.2 Undergrad
+11     8 Method.2 Undergrad
+12     7 Method.2 Undergrad
+13    12 Method.2      Grad
+14    11 Method.2      Grad
+15    12 Method.2      Grad
+16     9 Method.2      Grad
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-25" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Ici, nous allons tenter de déterminer si (i) la note moyenne obtenue diffère selon le niveau d&#39;études, (ii) la note moyenne obtenue diffère selon la méthode d&#39;enseignement et (iii) les 2 méthodes ont la même efficacité pour enseigner aux étudiants des 2 niveaux.  </p>
+
+<p>Il y aura donc 3 groupes d&#39;hypothèses qui seront testées simultanément : </p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : le niveau d&#39;étude n&#39;influence pas la moyenne obtenue</li>
+<li>\(H_1\) : le niveau d&#39;étude influence la moyenne obtenue</li>
+</ul>
+
+<p><br/></p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : la méthode d&#39;enseignement n&#39;influence pas la moyenne obtenue</li>
+<li>\(H_1\) : la méthode d&#39;enseignement influence la moyenne obtenue</li>
+</ul>
+
+<p><br/></p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : la méthode d&#39;enseignement influence de la même façon les 2 groupes d&#39;étudiants</li>
+<li>\(H_1\) : la méthode d&#39;enseignement influence de façon différente les 2 groupes d&#39;étudiants</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-26" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">out &lt;- aov(Notes ~ Students * Teaching, data = dat)
+summary(out)
+</code></pre>
+
+<pre><code>                  Df Sum Sq Mean Sq F value  Pr(&gt;F)    
+Students           1    144   144.0     108 2.4e-07 ***
+Teaching           1     64    64.0      48 1.6e-05 ***
+Students:Teaching  1     16    16.0      12  0.0047 ** 
+Residuals         12     16     1.3                    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+<p>Les 3 hypothèses nulles sont donc validées. L&#39;interprétation est aisée puisque chaque facteur n&#39;a que 2 modalités. S&#39;ils en avaient plus, il faudrait recourrir aux tests de comparaisons multiples.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-27" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Comparaisons multiples</h3>
+
+<pre><code class="r">TukeyHSD(out,&quot;Students&quot;)
+</code></pre>
+
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Notes ~ Students * Teaching, data = dat)
+
+$Students
+               diff    lwr    upr p adj
+Undergrad-Grad   -6 -7.258 -4.742     0
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-28" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Comparaisons multiples</h3>
+
+<pre><code class="r">TukeyHSD(out,&quot;Teaching&quot;)
+</code></pre>
+
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Notes ~ Students * Teaching, data = dat)
+
+$Teaching
+                  diff    lwr    upr p adj
+Method.2-Method.1   -4 -5.258 -2.742     0
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-29" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Comparaisons multiples</h3>
+
+<pre><code class="r">TukeyHSD(out,&quot;Students:Teaching&quot;)
+</code></pre>
+
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Notes ~ Students * Teaching, data = dat)
+
+$`Students:Teaching`
+                                      diff      lwr     upr  p adj
+Undergrad:Method.1-Grad:Method.1        -8 -10.4241 -5.5759 0.0000
+Grad:Method.2-Grad:Method.1             -6  -8.4241 -3.5759 0.0000
+Undergrad:Method.2-Grad:Method.1       -10 -12.4241 -7.5759 0.0000
+Grad:Method.2-Undergrad:Method.1         2  -0.4241  4.4241 0.1200
+Undergrad:Method.2-Undergrad:Method.1   -2  -4.4241  0.4241 0.1200
+Undergrad:Method.2-Grad:Method.2        -4  -6.4241 -1.5759 0.0018
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-30">
+<hgroup>
+  <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+</hgroup>
+<article class = 'flexbox vcenter'>
+<h3>Visualiser les effets et les interactions</h3>
+
+<p><img src="figure/unnamed-chunk-23.png" alt="plot of chunk unnamed-chunk-23"> </p>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-31" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Vérification des conditions d&#39;application</h3>
+
+<p>Évidemment, tout ceci suppose que les conditions d&#39;applications soient vérifiées :</p>
+
+<div style='float:left;width:48%;'>
+  <pre><code class="r">plot(out, which = 2)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-24.png" alt="plot of chunk unnamed-chunk-24"> </p>
+
+</div>
+<div style='float:right;width:48%;'>
+  <pre><code class="r">plot(out, which = 1)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-25.png" alt="plot of chunk unnamed-chunk-25"> </p>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-32" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, groupes indépendants</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Vérification des conditions d&#39;application</h3>
+
+<p>Les résidus semblent homogènes et ils sont distribués normalement :</p>
+
+<pre><code class="r">shapiro.test(out$residuals)
+</code></pre>
+
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  out$residuals
+W = 0.932, p-value = 0.2619
+</code></pre>
+
+<p>C&#39;est donc tout bon !</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-33" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs que nous allons décrire :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul>
+<li><span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span></li>
+<li><span style="color: #000000">ANOVA un facteur, mesures répétées</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-34" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Ici, chaque sujet fournit <span style="color: #ff0000">plusieurs scores : un pour chaque modalité</span> du facteur étudié.  </p>
+
+<p>Exemple : 4 individus subissent un test par semaine pendant 3 semaines.</p>
+
+<!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
+
+<!-- Sun Mar  2 18:14:17 2014 -->
+
+<TABLE border=1>
+<TR> <TH>  </TH> <TH> Week.1 </TH> <TH> Week.2 </TH> <TH> Week.3 </TH>  </TR>
+  <TR> <TD align="right"> subject.1 </TD> <TD align="right"> 2.00 </TD> <TD align="right"> 5.00 </TD> <TD align="right"> 8.00 </TD> </TR>
+  <TR> <TD align="right"> subject.2 </TD> <TD align="right"> 4.00 </TD> <TD align="right"> 4.00 </TD> <TD align="right"> 9.00 </TD> </TR>
+  <TR> <TD align="right"> subject.3 </TD> <TD align="right"> 5.00 </TD> <TD align="right"> 8.00 </TD> <TD align="right"> 10.00 </TD> </TR>
+  <TR> <TD align="right"> subject.4 </TD> <TD align="right"> 5.00 </TD> <TD align="right"> 7.00 </TD> <TD align="right"> 9.00 </TD> </TR>
+   </TABLE>
+
+<p></br>
+En fait, on peut considérer qu&#39;il s&#39;agit d&#39;une ANOVA 2 facteurs avec un facteur fixe (Semaine) et un facteur aléatoire (Sujet). Dans la pratique, seul le facteur Semaine nous intéresse. C&#39;est un facteur fixe car si nous devions refaire la même expérience, les mêmes dates pourraient être choisies.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-35" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>La présentation correcte des données dans R est la suivante :</p>
+
+<pre><code>   Notes Week Subject
+1      2    1       1
+2      4    1       2
+3      5    1       3
+4      5    1       4
+5      5    2       1
+6      4    2       2
+7      8    2       3
+8      7    2       4
+9      8    3       1
+10     9    3       2
+11    10    3       3
+12     9    3       4
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-36" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Ici, les hypothèses nulles et alternatives sont les suivantes :</p>
+
+<ul>
+<li>\(H_0\) Les notes ne varient pas avec le temps ; \(H_1\) Les notes varient avec le temps</li>
+</ul>
+
+<pre><code class="r">out &lt;- aov(Notes ~ Week + Error(Subject), data = dat)
+summary(out)
+</code></pre>
+
+<pre><code>
+Error: Subject
+          Df Sum Sq Mean Sq F value Pr(&gt;F)
+Residuals  3   13.3    4.44               
+
+Error: Within
+          Df Sum Sq Mean Sq F value Pr(&gt;F)    
+Week       2   50.7   25.33    32.6  6e-04 ***
+Residuals  6    4.7    0.78                   
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-37" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Il est possible de calculer &quot;à la main&quot; la valeur de probabilité associée à une valeur de \(F\) et des degrés de liberté donnés.</p>
+
+<pre><code>          Df Sum Sq Mean Sq F value Pr(&gt;F)    
+Week       2   50.7   25.33    32.6  6e-04 ***
+Residuals  6    4.7    0.78                   
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+<pre><code class="r">1 - pf(32.6, 2, 6)
+</code></pre>
+
+<pre><code>[1] 0.0005984
+</code></pre>
+
+<p>Ça sera utile pour calculer une $p-$value corrigée si l&#39;une des conditions d&#39;application n&#39;est pas vérifiée.  </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-38" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p></br>
+Car tous les modèles d&#39;ANOVA avec mesures répétées possèdent une condition d&#39;application supplémentaire : <span style="color: #ff0000">la sphéricité</span> (sphéritude ?) qui peut être testée avec le <span style="color: #ff0000">test de Mauchly</span> (mais souvent problématique selon la taille d&#39;échantillon). </p>
+
+<p>Si les données ne sont pas sphériques, l&#39;erreur de type I peut fortement augmenter. On peut alors :</p>
+
+<ul class = "build incremental">
+<li>transformer les données</li>
+<li>corriger les p-values obtenues grâce au calcul d&#39;\(\varepsilon\)</li>
+<li>passer par la procédure de MANOVA (ANOVA multivariée)</li>
+<li>aller boire un coup</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-39" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Puisque le test de Mauchly est <span style="color: #ff0000">très critiqué</span>, la méthode du calcul d&#39;\(\varepsilon\) est généralement utilisée.  </p>
+
+<p>\(\varepsilon\) mesure la sphéricité et varie entre 1 (données sphériques, tout va bien) et \(\frac{1}{k-1}\) avec \(k\) égal au nombre de mesures répétées (ici, \(k=3\)).  </p>
+
+<p>\(\varepsilon\) permet alors de corriger la $p-$value de l&#39;ANOVA. Pour cela, on multiplie simplement les degrés de liberté par \(\frac{1}{k-1}\). La $p-$value devient donc :</p>
+
+<pre><code class="r">1 - pf(32.6, 2 * 0.5, 6 * 0.5)
+</code></pre>
+
+<pre><code>[1] 0.01066
+</code></pre>
+
+<p>au lieu de </p>
+
+<pre><code>[1] 0.0005984
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-40" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/></p>
+
+<p>Pour interpréter ce résultat, il faut revenir aux données et calculer la moyenne de chaque groupe : </p>
+
+<pre><code class="r">tapply(dat$Notes, dat$Week, mean)
+</code></pre>
+
+<pre><code>1 2 3 
+4 6 9 
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-41" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/></p>
+
+<p>À ce stade, plusieurs hypothèses sont toujours à tester :</p>
+
+<ul>
+<li>tous les groupes ont des résultats significativement différents les uns des autres</li>
+<li>les prof ont des résultats significativement meilleurs que les grad et undergrad, qui eux ont des résultats qui ne diffèrent pas significativement</li>
+<li>les prof et grad ont des résultats significativement meilleurs que les undergrad mais les résultats des prof et grad ne diffèrent pas significativement les uns des autres</li>
+<li>les prof et undergrad diffèrent significativement l&#39;un de l&#39;autre mais aucun des 2 groupes ne diffère des grad.</li>
+<li>aucun groupe ne diffère significativement des autres groupes</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-42" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Pour trancher, nous avons donc besoin d&#39;un test de comparaisons multiples. Dans le cas d&#39;une ANOVA 1 facteur avec des mesures répétées, et à supposer que les conditions d&#39;applications de l&#39;ANOVA étaient bien réunies, le <span style="color: #ff0000">test de Student sur données appariées</span> est une solution adaptée, à condition de tenir compte de l&#39;augmentation de l&#39;erreur de type I : </p>
+
+<pre><code class="r">pairwise.t.test(dat$Notes, dat$Week, paired = TRUE)
+</code></pre>
+
+<pre><code>
+    Pairwise comparisons using paired t tests 
+
+data:  dat$Notes and dat$Week 
+
+  1      2     
+2 0.0663 -     
+3 0.0035 0.0480
+
+P value adjustment method: holm 
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-43" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>La puissance de l&#39;ANOVA</h3>
+
+<p>Le choix d&#39;un design expérimental a des conséquences sur le type d&#39;analyse statistique qu&#39;il sera possible de réaliser. Or toutes les analyses n&#39;ont pas la même puissance.</p>
+
+<p>Le modèle d&#39;ANOVA un facteur sur mesures répétées est <span style="color: #ff0000">plus puissant</span> que le modèle un facteur groupes indépendants. </p>
+
+<p>Exemple :</p>
+
+<!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
+
+<!-- Sun Mar  2 18:14:17 2014 -->
+
+<TABLE border=1>
+<TR> <TH> 1 </TH> <TH> 2 </TH> <TH> 3 </TH>  </TR>
+  <TR> <TD align="right"> 11.00 </TD> <TD align="right"> 12.00 </TD> <TD align="right"> 13.00 </TD> </TR>
+  <TR> <TD align="right"> 8.00 </TD> <TD align="right"> 10.00 </TD> <TD align="right"> 12.00 </TD> </TR>
+  <TR> <TD align="right"> 5.00 </TD> <TD align="right"> 8.00 </TD> <TD align="right"> 11.00 </TD> </TR>
+  <TR> <TD align="right"> 4.00 </TD> <TD align="right"> 6.00 </TD> <TD align="right"> 8.00 </TD> </TR>
+   </TABLE>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-44" style="background:;">
+  <hgroup>
+    <h2>ANOVA 1 facteur, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>La puissance de l&#39;ANOVA</h3>
+
+<pre><code class="r">summary(aov(Notes ~ Week + Error(Subject), data = dat)$Within)
+</code></pre>
+
+<pre><code>          Df Sum Sq Mean Sq F value Pr(&gt;F)   
+Week       2     32   16.00      24 0.0014 **
+Residuals  6      4    0.67                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+<pre><code class="r">summary(aov(Notes ~ Week, data = dat))
+</code></pre>
+
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)
+Week         2     32   16.00    2.25   0.16
+Residuals    9     64    7.11               
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-45" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs que nous allons décrire :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul>
+<li><span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA un facteur, mesures répétées</span></li>
+<li><span style="color: #000000">ANOVA deux facteurs, mesures mixtes</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures répétées</span></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-46" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Ici, les individus sont répartis en plusieurs groupes selon un facteur et chaque individu fournit nevaleur pour chaque modalité du second facteur.</p>
+
+<p>Exemple : test de l&#39;effet d&#39;une drogue X au cours du temps sur les capacités cognitives. Comparaison d&#39;un groupe traité avec un groupe témoin.</p>
+
+<!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
+
+<!-- Sun Mar  2 18:14:18 2014 -->
+
+<TABLE border=1>
+<TR> <TH>  </TH> <TH> T10 </TH> <TH> T20 </TH> <TH> T30 </TH>  </TR>
+  <TR> <TD align="right"> Drug.Subject1 </TD> <TD align="right"> 28.00 </TD> <TD align="right"> 25.00 </TD> <TD align="right"> 34.00 </TD> </TR>
+  <TR> <TD align="right"> Drug.Subject2 </TD> <TD align="right"> 23.00 </TD> <TD align="right"> 30.00 </TD> <TD align="right"> 32.00 </TD> </TR>
+  <TR> <TD align="right"> Drug.Subject3 </TD> <TD align="right"> 25.00 </TD> <TD align="right"> 30.00 </TD> <TD align="right"> 35.00 </TD> </TR>
+  <TR> <TD align="right"> Drug.Subject4 </TD> <TD align="right"> 24.00 </TD> <TD align="right"> 35.00 </TD> <TD align="right"> 39.00 </TD> </TR>
+  <TR> <TD align="right"> Placebo.Subject5 </TD> <TD align="right"> 28.00 </TD> <TD align="right"> 22.00 </TD> <TD align="right"> 24.00 </TD> </TR>
+  <TR> <TD align="right"> Placebo.Subject6 </TD> <TD align="right"> 24.00 </TD> <TD align="right"> 23.00 </TD> <TD align="right"> 22.00 </TD> </TR>
+  <TR> <TD align="right"> Placebo.Subject7 </TD> <TD align="right"> 23.00 </TD> <TD align="right"> 26.00 </TD> <TD align="right"> 21.00 </TD> </TR>
+  <TR> <TD align="right"> Placebo.Subject8 </TD> <TD align="right"> 21.00 </TD> <TD align="right"> 21.00 </TD> <TD align="right"> 21.00 </TD> </TR>
+   </TABLE>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-47" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Comme pour l&#39;ANOVA 2 facteurs sur groupes indépendants, il y a 3 couples d&#39;hypothèses :</p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : la drogue X n&#39;a pas d&#39;effet sur les capacités cognitives</li>
+<li>\(H_1\) : la drogue X a un effet sur les capacités cognitives</li>
+</ul>
+
+<p></br></p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : les capacités cognitives sont constantes au cours du temps</li>
+<li>\(H_1\) : les capacités cognitives sont variables au cours du temps</li>
+</ul>
+
+<p></br></p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : les capacités cognitives évoluent de la même façon au cours du temps avec et sans drogue X</li>
+<li>\(H_1\) : les capacités cognitives évoluent différemment au cours du temps avec et sans drogue X</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-48" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Mise en forme pour travailler dans R :</p>
+
+<div style='float:left;width:48%;'>
+  <pre><code>   Reaction Time    Drug   Subject
+1        28  T10       X Subject.1
+2        23  T10       X Subject.2
+3        25  T10       X Subject.3
+4        24  T10       X Subject.4
+5        28  T10 Placebo Subject.5
+6        24  T10 Placebo Subject.6
+7        23  T10 Placebo Subject.7
+8        21  T10 Placebo Subject.8
+9        25  T20       X Subject.1
+10       30  T20       X Subject.2
+11       30  T20       X Subject.3
+12       35  T20       X Subject.4
+</code></pre>
+
+</div>
+<div style='float:right;width:48%;'>
+  <pre><code>   Reaction Time    Drug   Subject
+13       22  T20 Placebo Subject.5
+14       23  T20 Placebo Subject.6
+15       26  T20 Placebo Subject.7
+16       21  T20 Placebo Subject.8
+17       34  T30       X Subject.1
+18       32  T30       X Subject.2
+19       35  T30       X Subject.3
+20       39  T30       X Subject.4
+21       24  T30 Placebo Subject.5
+22       22  T30 Placebo Subject.6
+23       21  T30 Placebo Subject.7
+24       21  T30 Placebo Subject.8
+</code></pre>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-49" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">out &lt;- aov(Reaction ~ Time * Drug + Error(Subject), data = dat)
+summary(out)
+</code></pre>
+
+<pre><code>
+Error: Subject
+          Df Sum Sq Mean Sq F value Pr(&gt;F)   
+Drug       1  294.0   294.0    33.1 0.0012 **
+Residuals  6   53.3     8.9                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Error: Within
+          Df Sum Sq Mean Sq F value Pr(&gt;F)   
+Time       2   64.0    32.0    4.65 0.0321 * 
+Time:Drug  2  144.0    72.0   10.45 0.0024 **
+Residuals 12   82.7     6.9                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-50" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Ici, on rejette \(H_0\) systématiquement. Toutefois, si l&#39;on ajuste le calcul des \(p-\) value pour tenir compte de la (non) sphéricité pour le facteur répété, les conclusions changent :</p>
+
+<pre><code>          Df Sum Sq Mean Sq F value Pr(&gt;F)   
+Time       2   64.0    32.0    4.65 0.0321 * 
+Time:Drug  2  144.0    72.0   10.45 0.0024 **
+Residuals 12   82.7     6.9                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+<pre><code class="r">1 - pf(4.645, 1, 6)
+</code></pre>
+
+<pre><code>[1] 0.07457
+</code></pre>
+
+<pre><code class="r">1 - pf(10.452, 1, 6)
+</code></pre>
+
+<pre><code>[1] 0.01784
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-51" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Interprétation des résultats</h3>
+
+<p>Pour interpréter ces résultats, on peut calculer les moyennes par catégorie</p>
+
+<pre><code class="r">tapply(dat$Reaction, list(dat$Drug, dat$Time), mean)
+</code></pre>
+
+<pre><code>        T10 T20 T30
+Placebo  24  23  22
+X        25  30  35
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-52" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Interprétation des résultats</h3>
+
+<p>On peut aussi faire le graphique des interactions</p>
+
+<pre><code class="r">with(dat, interaction.plot(Time, Drug, Reaction, type = &quot;b&quot;, pch = c(1, 19)))
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-44.png" alt="plot of chunk unnamed-chunk-44"> </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-53" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures mixtes</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Interprétation des résultats</h3>
+
+<p>Nous pouvons donc conclure que le temps nécessaire à la réalisation du test cognitif prend en moyenne 30 secondes pour les sujets ayant reçu la drogue X, contre 23 secondes pour les sujets sous placébo, ce qui est significatif au seuil \(\alpha =\) 0.01 (\(p=\) 0.0012).</p>
+
+<p></br>
+Le temps de réaction augmente (les performances se dégradent) avec le temps puisque les temps de réaction moyens sont les suivants :</p>
+
+<pre><code> T10  T20  T30 
+24.5 26.5 28.5 
+</code></pre>
+
+<p>Cette dégradation des performances n&#39;est pas significative au seuil \(\alpha =\) 0.05 (\(p=\) 0.0746) </p>
+
+<p></br>
+Les performances des sujets sous placébo s&#39;améliorent faiblement avec le temps alors qu&#39;elle diminuent fortement chez les patients traités avec la drogue X. Cet effet est significatif au seuil \(\alpha =\) 0.05 (\(p=\) 0.0178)</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-54" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs que nous allons décrire :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul>
+<li><span style="color: #cccccc">ANOVA un facteur, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, groupes indépendants</span></li>
+<li><span style="color: #cccccc">ANOVA un facteur, mesures répétées</span></li>
+<li><span style="color: #cccccc">ANOVA deux facteurs, mesures mixtes</span></li>
+<li><span style="color: #000000">ANOVA deux facteurs, mesures répétées</span></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-55" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <p></br>
+Ici, chaque individu fournit un score pour chaque combinaison de modalité des 2 facteurs étudiés. Comme pour l&#39;ANOVA 1 facteur, ce design est beaucoup plus puissant que l&#39;ANOVA 2 facteurs sur groupes indépendants.</p>
+
+<p>Exemple : capacité de détecter certains sons (haute ou basse fréquence) en fonction de la présence d&#39;un bruit de fond à haute ou basse fréquence. Chaque sujet fait 2 seesions d&#39;écoute, une dans chaque condition de bruit de fond. Pour chaque session, les sujets sont soumis à 30 stimuli haute fréquence et 30 stimuli basse fréquence. Le score correspond au nombre de stimuli détecté dans chaque condition.</p>
+
+<p></br>
+Le questionnement scientifique est le suivant : est-ce que le bruit de fond affecte la capacité des sujets à détecter différents stimuli ?</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-56" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Les données</h3>
+
+<!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
+
+<!-- Sun Mar  2 18:14:18 2014 -->
+
+<TABLE border=1>
+<TR> <TH>  </TH> <TH> Bg.low </TH> <TH> Bg.Low </TH> <TH> Bg.High </TH> <TH> Bg.High </TH>  </TR>
+  <TR> <TD align="right">  </TD> <TD> Stim.Low </TD> <TD> Stim.High </TD> <TD> Stim.Low </TD> <TD> Stim.High </TD> </TR>
+  <TR> <TD align="right"> S1 </TD> <TD> 12 </TD> <TD> 18 </TD> <TD> 20 </TD> <TD> 8 </TD> </TR>
+  <TR> <TD align="right"> S2 </TD> <TD> 9 </TD> <TD> 20 </TD> <TD> 24 </TD> <TD> 10 </TD> </TR>
+  <TR> <TD align="right"> S3 </TD> <TD> 9 </TD> <TD> 22 </TD> <TD> 16 </TD> <TD> 9 </TD> </TR>
+  <TR> <TD align="right"> S4 </TD> <TD> 10 </TD> <TD> 22 </TD> <TD> 18 </TD> <TD> 11 </TD> </TR>
+  <TR> <TD align="right"> S5 </TD> <TD> 9 </TD> <TD> 17 </TD> <TD> 18 </TD> <TD> 10 </TD> </TR>
+  <TR> <TD align="right"> S6 </TD> <TD> 11 </TD> <TD> 23 </TD> <TD> 22 </TD> <TD> 12 </TD> </TR>
+   </TABLE>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-57" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Hypothèses</h3>
+
+<ul class = "build incremental">
+<li>\(H_0\) : le bruit de fond n&#39;a pas d&#39;effet sur les capacités de détection</li>
+<li>\(H_1\) : le bruit de fond affecte les capacités de détection</li>
+</ul>
+
+<p></br></p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : la fréquence du stimulus n&#39;affecte pas la capacité de détection</li>
+<li>\(H_1\) : la fréquence du stimulus affecte la capacité de détection</li>
+</ul>
+
+<p></br></p>
+
+<ul class = "build incremental">
+<li>\(H_0\) : la qualité du bruit de fond affecte de la même façon la capacité de détection de stimuli à différentes fréquences</li>
+<li>\(H_1\) : la qualité du bruit de fond affecte de façon différente la capacité de détection de stimuli à différentes fréquences</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-58" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Mise en forme des données pour R :</h3>
+
+<div style='float:left;width:48%;'>
+  <pre><code>   Score Noise Stimulus   Subject
+1     12   Low      Low Subject.1
+2      9   Low      Low Subject.2
+3      9   Low      Low Subject.3
+4     10   Low      Low Subject.4
+5      9   Low      Low Subject.5
+6     11   Low      Low Subject.6
+7     18   Low     High Subject.1
+8     20   Low     High Subject.2
+9     22   Low     High Subject.3
+10    22   Low     High Subject.4
+11    17   Low     High Subject.5
+12    23   Low     High Subject.6
+</code></pre>
+
+</div>
+<div style='float:right;width:48%;'>
+  <pre><code>   Score Noise Stimulus   Subject
+13    20  High      Low Subject.1
+14    24  High      Low Subject.2
+15    16  High      Low Subject.3
+16    18  High      Low Subject.4
+17    18  High      Low Subject.5
+18    22  High      Low Subject.6
+19     8  High     High Subject.1
+20    10  High     High Subject.2
+21     9  High     High Subject.3
+22    11  High     High Subject.4
+23    10  High     High Subject.5
+24    12  High     High Subject.6
+</code></pre>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-59" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Réalisation de l&#39;ANOVA :</h3>
+
+<pre><code class="r">out &lt;- aov(Score ~ Noise * Stimulus + Error(Subject/(Noise * Stimulus)), data = dat)
+summary(out)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-60" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code>
+Error: Subject
+          Df Sum Sq Mean Sq F value Pr(&gt;F)
+Residuals  5   32.5     6.5               
+
+Error: Subject:Noise
+          Df Sum Sq Mean Sq F value Pr(&gt;F)
+Noise      1   0.67    0.67    0.18   0.69
+Residuals  5  18.83    3.77               
+
+Error: Subject:Stimulus
+          Df Sum Sq Mean Sq F value Pr(&gt;F)
+Stimulus   1   0.67    0.67    0.12   0.74
+Residuals  5  26.83    5.37               
+
+Error: Subject:Noise:Stimulus
+               Df Sum Sq Mean Sq F value Pr(&gt;F)    
+Noise:Stimulus  1    600     600     240  2e-05 ***
+Residuals       5     12       2                   
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-61" style="background:;">
+  <hgroup>
+    <h2>ANOVA 2 facteurs, mesures répétées</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Interprétation</h3>
+
+<p></br>
+Ici, chaque facteur n&#39;a que 2 modalités : pas de problème de sphéricité.  </p>
+
+<p></br></p>
+
+<ol class = "build incremental">
+<li>Bruit de fond : nous n&#39;avons aucune preuve que la qualité du bruit de fond affecte la capacité de détection des stimuli</li>
+<li>Stimulus : nous n&#39;avons aucune preuve que la capacité de détection d&#39;un stimulus soit liée à la fréquence du stimulus</li>
+<li>Interaction : nous avons la preuve (\(p <<\) 0.001) que la capacité de détecter un stimulus de haute ou basse fréquence dépend de la qualité du bruit de fond.</li>
+</ol>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-62">
+<hgroup>
+  <h2>ANOVA 2 facteurs, mesures répétées</h2>
+</hgroup>
+<article class = 'flexbox vcenter'>
+<pre><code class="r">with(dat, interaction.plot(Noise, Stimulus, Score, type = &quot;b&quot;, pch = c(1, 19)))
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-51.png" alt="plot of chunk unnamed-chunk-51"> </p>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-63" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs que nous <del>allons décrire</del> avons décrites :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul>
+<li>ANOVA un facteur, groupes indépendants</li>
+<li>ANOVA deux facteurs, groupes indépendants</li>
+<li>ANOVA un facteur, mesures répétées</li>
+<li>ANOVA deux facteurs, mesures mixtes</li>
+<li>ANOVA deux facteurs, mesures répétées</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-64" style="background:;">
+  <hgroup>
+    <h2>Les ANOVAs ou méthodes proches que pourrions décrire :</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><br/><br/></p>
+
+<ul class = "build incremental">
+<li>ANOVA hiérarchiques</li>
+<li>ANOVA k facteurs : bon courage pour l&#39;interprétation</li>
+<li>ANOVA &quot;unbalanced&quot;</li>
+<li>MANOVA (Anova multivariées)</li>
+<li>ANCOVA (Analyse de covariance)</li>
+<li>AMOVA (Analyse de variance moléculaire)</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='L&#39;ANOVA : pour quoi faire ?'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='L&#39;ANOVA : pour quoi faire ?'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='L&#39;ANOVA : pour quoi faire ?'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='ANOVA et régression'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title=''>
+         5
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=6 title='Les grands principes'>
+         6
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=7 title='Les grands principes'>
+         7
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=8 title='Les grands principes'>
+         8
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=9 title='Les grands principes'>
+         9
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=10 title='Les ANOVAs que nous allons décrire :'>
+         10
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=11 title='Les ANOVAs que nous allons décrire :'>
+         11
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=12 title='ANOVA 1 facteur, groupes indépendants'>
+         12
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=13 title='ANOVA 1 facteur, groupes indépendants'>
+         13
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=14 title='ANOVA 1 facteur, groupes indépendants'>
+         14
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=15 title='ANOVA 1 facteur, groupes indépendants'>
+         15
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=16 title='ANOVA 1 facteur, groupes indépendants'>
+         16
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=17 title='ANOVA 1 facteur, groupes indépendants'>
+         17
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=18 title='ANOVA 1 facteur, groupes indépendants'>
+         18
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=19 title='ANOVA 1 facteur, groupes indépendants'>
+         19
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=20 title='ANOVA 1 facteur, groupes indépendants'>
+         20
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=21 title='ANOVA 1 facteur, groupes indépendants'>
+         21
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=22 title='Les ANOVAs que nous allons décrire :'>
+         22
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=23 title='ANOVA 2 facteurs, groupes indépendants'>
+         23
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=24 title='ANOVA 2 facteurs, groupes indépendants'>
+         24
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=25 title='ANOVA 2 facteurs, groupes indépendants'>
+         25
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=26 title='ANOVA 2 facteurs, groupes indépendants'>
+         26
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=27 title='ANOVA 2 facteurs, groupes indépendants'>
+         27
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=28 title='ANOVA 2 facteurs, groupes indépendants'>
+         28
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=29 title='ANOVA 2 facteurs, groupes indépendants'>
+         29
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=30 title='ANOVA 2 facteurs, groupes indépendants'>
+         30
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=31 title='ANOVA 2 facteurs, groupes indépendants'>
+         31
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=32 title='ANOVA 2 facteurs, groupes indépendants'>
+         32
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=33 title='Les ANOVAs que nous allons décrire :'>
+         33
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=34 title='ANOVA 1 facteur, mesures répétées'>
+         34
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=35 title='ANOVA 1 facteur, mesures répétées'>
+         35
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=36 title='ANOVA 1 facteur, mesures répétées'>
+         36
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=37 title='ANOVA 1 facteur, mesures répétées'>
+         37
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=38 title='ANOVA 1 facteur, mesures répétées'>
+         38
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=39 title='ANOVA 1 facteur, mesures répétées'>
+         39
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=40 title='ANOVA 1 facteur, mesures répétées'>
+         40
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=41 title='ANOVA 1 facteur, mesures répétées'>
+         41
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=42 title='ANOVA 1 facteur, mesures répétées'>
+         42
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=43 title='ANOVA 1 facteur, mesures répétées'>
+         43
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=44 title='ANOVA 1 facteur, mesures répétées'>
+         44
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=45 title='Les ANOVAs que nous allons décrire :'>
+         45
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=46 title='ANOVA 2 facteurs, mesures mixtes'>
+         46
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=47 title='ANOVA 2 facteurs, mesures mixtes'>
+         47
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=48 title='ANOVA 2 facteurs, mesures mixtes'>
+         48
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=49 title='ANOVA 2 facteurs, mesures mixtes'>
+         49
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=50 title='ANOVA 2 facteurs, mesures mixtes'>
+         50
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=51 title='ANOVA 2 facteurs, mesures mixtes'>
+         51
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=52 title='ANOVA 2 facteurs, mesures mixtes'>
+         52
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=53 title='ANOVA 2 facteurs, mesures mixtes'>
+         53
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=54 title='Les ANOVAs que nous allons décrire :'>
+         54
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=55 title='ANOVA 2 facteurs, mesures répétées'>
+         55
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=56 title='ANOVA 2 facteurs, mesures répétées'>
+         56
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=57 title='ANOVA 2 facteurs, mesures répétées'>
+         57
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=58 title='ANOVA 2 facteurs, mesures répétées'>
+         58
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=59 title='ANOVA 2 facteurs, mesures répétées'>
+         59
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=60 title='ANOVA 2 facteurs, mesures répétées'>
+         60
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=61 title='ANOVA 2 facteurs, mesures répétées'>
+         61
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=62 title='ANOVA 2 facteurs, mesures répétées'>
+         62
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=63 title='Les ANOVAs que nous <del>allons décrire</del> avons décrites :'>
+         63
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=64 title='Les ANOVAs ou méthodes proches que pourrions décrire :'>
+         64
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
