@@ -412,7 +412,7 @@ Puisque les groupes sont ici indépendants, chaque sujet/individu ne fournit qu'
 Voici un exemple de design expérimental pour 2 facteurs et 2 modalités par facteur :
 
 <!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
-<!-- Sun Mar  2 18:14:17 2014 -->
+<!-- Wed Apr 16 15:37:59 2014 -->
 <TABLE border=1>
 <TR> <TH>  </TH> <TH> Teach.meth.1 </TH> <TH> Teach.meth.2 </TH>  </TR>
   <TR> <TD align="right"> Undergrad </TD> <TD align="right"> 8.00 </TD> <TD align="right"> 6.00 </TD> </TR>
@@ -493,7 +493,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 
-Les 3 hypothèses nulles sont donc validées. L'interprétation est aisée puisque chaque facteur n'a que 2 modalités. S'ils en avaient plus, il faudrait recourrir aux tests de comparaisons multiples.
+Les 3 hypothèses nulles sont donc rejetées. L'interprétation est aisée puisque chaque facteur n'a que 2 modalités. S'ils en avaient plus, il faudrait recourrir aux tests de comparaisons multiples.
 
 ---
 
@@ -652,7 +652,7 @@ Ici, chaque sujet fournit <span style="color: #ff0000">plusieurs scores : un pou
 Exemple : 4 individus subissent un test par semaine pendant 3 semaines.
 
 <!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
-<!-- Sun Mar  2 18:14:17 2014 -->
+<!-- Wed Apr 16 15:38:00 2014 -->
 <TABLE border=1>
 <TR> <TH>  </TH> <TH> Week.1 </TH> <TH> Week.2 </TH> <TH> Week.3 </TH>  </TR>
   <TR> <TD align="right"> subject.1 </TD> <TD align="right"> 2.00 </TD> <TD align="right"> 5.00 </TD> <TD align="right"> 8.00 </TD> </TR>
@@ -695,7 +695,7 @@ La présentation correcte des données dans R est la suivante :
 
 Ici, les hypothèses nulles et alternatives sont les suivantes :
 
-* $H_0$ Les notes ne varient pas avec le temps ; $H_1$ Les notes varient avec le temps
+* $H_0$ : Les notes ne varient pas avec le temps ; $H_1$ : Les notes varient avec le temps
 
 
 ```r
@@ -857,7 +857,7 @@ Le modèle d'ANOVA un facteur sur mesures répétées est <span style="color: #f
 Exemple :
 
 <!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
-<!-- Sun Mar  2 18:14:17 2014 -->
+<!-- Wed Apr 16 15:38:00 2014 -->
 <TABLE border=1>
 <TR> <TH> 1 </TH> <TH> 2 </TH> <TH> 3 </TH>  </TR>
   <TR> <TD align="right"> 11.00 </TD> <TD align="right"> 12.00 </TD> <TD align="right"> 13.00 </TD> </TR>
@@ -921,7 +921,7 @@ Ici, les individus sont répartis en plusieurs groupes selon un facteur et chaqu
 Exemple : test de l'effet d'une drogue X au cours du temps sur les capacités cognitives. Comparaison d'un groupe traité avec un groupe témoin.
 
 <!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
-<!-- Sun Mar  2 18:14:18 2014 -->
+<!-- Wed Apr 16 15:38:00 2014 -->
 <TABLE border=1>
 <TR> <TH>  </TH> <TH> T10 </TH> <TH> T20 </TH> <TH> T30 </TH>  </TR>
   <TR> <TD align="right"> Drug.Subject1 </TD> <TD align="right"> 28.00 </TD> <TD align="right"> 25.00 </TD> <TD align="right"> 34.00 </TD> </TR>
@@ -1148,7 +1148,7 @@ Le questionnement scientifique est le suivant : est-ce que le bruit de fond affe
 ### Les données
 
 <!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
-<!-- Sun Mar  2 18:14:18 2014 -->
+<!-- Wed Apr 16 15:38:01 2014 -->
 <TABLE border=1>
 <TR> <TH>  </TH> <TH> Bg.low </TH> <TH> Bg.Low </TH> <TH> Bg.High </TH> <TH> Bg.High </TH>  </TR>
   <TR> <TD align="right">  </TD> <TD> Stim.Low </TD> <TD> Stim.High </TD> <TD> Stim.Low </TD> <TD> Stim.High </TD> </TR>

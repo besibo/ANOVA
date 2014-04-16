@@ -433,7 +433,7 @@ out <- aov(Notes~Students*Teaching, data=dat)
 summary(out)
 ```
 
-Les 3 hypothèses nulles sont donc validées. L'interprétation est aisée puisque chaque facteur n'a que 2 modalités. S'ils en avaient plus, il faudrait recourrir aux tests de comparaisons multiples.
+Les 3 hypothèses nulles sont donc rejetées. L'interprétation est aisée puisque chaque facteur n'a que 2 modalités. S'ils en avaient plus, il faudrait recourrir aux tests de comparaisons multiples.
 
 ---
 
@@ -574,7 +574,7 @@ dat
 
 Ici, les hypothèses nulles et alternatives sont les suivantes :
 
-* $H_0$ Les notes ne varient pas avec le temps ; $H_1$ Les notes varient avec le temps
+* $H_0$ : Les notes ne varient pas avec le temps ; $H_1$ : Les notes varient avec le temps
 
 ```{r}
 out <- aov(Notes~Week + Error(Subject) , data=dat)
