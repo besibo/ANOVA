@@ -8,11 +8,13 @@ highlighter : highlight.js  # {highlight.js, prettify, highlight}
 hitheme     : solarized_light      # 
 widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
 mode        : selfcontained # {standalone, draft}
+output: ioslides_presentation
 --- 
 
 ## L'ANOVA : pour quoi faire ?
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE}
+library(knitr)
 opts_knit$set(out.format = 'html')
 opts_chunk$set(comment="")
 ```
